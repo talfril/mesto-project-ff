@@ -1,24 +1,21 @@
 // @todo: Темплейт карточки
 const cardTemplate = document.querySelector('#card-template').content; 
 
-
 // @todo: DOM узлы
 const cardsOnPage = document.querySelector('.places__list');
 
-
 // @todo: Функция создания карточки
 function createCard(place, deleteFunction){
-        const cardItem = cardTemplate.querySelector('.card').cloneNode(true);
-        const deleteButton = cardItem.querySelector('.card__delete-button');
-        const cardImage = cardItem.querySelector('.card__image');
-        const cardTitle = cardItem.querySelector('.card__title');
-        cardImage.src = place.link;
-        cardImage.alt = 'Фотография с места - ' + place.name;
-        cardTitle.textContent = place.name;
-        deleteButton.addEventListener('click', deleteCard);
-        return cardItem;
-    };
-
+    const cardItem = cardTemplate.querySelector('.card').cloneNode(true);
+    const deleteButton = cardItem.querySelector('.card__delete-button');
+    const cardImage = cardItem.querySelector('.card__image');
+    const cardTitle = cardItem.querySelector('.card__title');
+    cardImage.src = place.link;
+    cardImage.alt = 'Фотография с места - ' + place.name;
+    cardTitle.textContent = place.name;
+    deleteButton.addEventListener('click', deleteFunction);
+    return cardItem;
+};
 
 // @todo: Функция удаления карточки
 function deleteCard(evt){
