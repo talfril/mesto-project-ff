@@ -1,76 +1,78 @@
 import '../pages/index.css';
-import {modalWindows} from './modal.js';
-import {initialCards} from './cards.js';
-
-
-// @todo: Темплейт карточки
-const cardTemplate = document.querySelector('#card-template').content; 
-
-// @todo: DOM узлы
-const cardsOnPage = document.querySelector('.places__list');
-
-// @todo: Функция создания карточки
-function createCard(place, deleteFunction, likeFunction){
-    const cardItem = cardTemplate.querySelector('.card').cloneNode(true);
-    const deleteButton = cardItem.querySelector('.card__delete-button');
-    const cardImage = cardItem.querySelector('.card__image');
-    const cardTitle = cardItem.querySelector('.card__title');
-    cardImage.src = place.link;
-    cardImage.alt = 'Фотография с места - ' + place.name;
-    cardTitle.textContent = place.name;
-    deleteButton.addEventListener('click', deleteFunction);
-    return cardItem;
-};
-
-// @todo: Функция удаления карточки
-function deleteCard(evt){
-    const cardToRemove = evt.target.closest('.card');
-    cardToRemove.remove();
-}
-
-//Функция лайка карточки
-
-function likeCard(evt) {
-    const currentCard = evt.target.closest('.card');
-    const cardToLike = currentCard.querySelector('.card__like-button');
-    cardToLike.classList.toggle('card__like-button_is-active');
-}
-
-cardsOnPage.addEventListener('click', function(evt) {
-    if (evt.target.classList.contains('card__like-button')) {
-        likeCard(evt);
-    }
-});
-
-// @todo:addCards Вывести карточки на страницу
-function addCards() {
-    while (cardsOnPage.firstChild) {
-        cardsOnPage.removeChild(cardsOnPage.firstChild);
-    }
-    initialCards.forEach(function(place) {
-        cardsOnPage.appendChild(createCard(place, deleteCard, likeCard)); 
-    });
-}
-
-//Добавление новой карточки через попап
-function addCardToCardsArray(evt) {
-    evt.preventDefault();
-    const newPlace = document.forms.newPlace;
-    const placeName = newPlace.querySelector('.popup__input_type_card-name');
-    const placeLink = newPlace.querySelector('.popup__input_type_url');
-    const newCard =     {
-        name: placeName.value,
-        link: placeLink.value,
-    };
-    initialCards.unshift(newCard);
-    document.querySelector('.popup_type_new-card').style.display = 'none';
-    newPlace.reset();
-    addCards();
-  }
-
+import {
+  cardsOnPage,
+  likeCard,
+  addCards,
+  addCardToCardsArray,
+} from './card.js';
+import {
+  openPopup,
+  closePopup,
+  openPopupByButton,
+  closePopapByButton,
+} from './modal.js';
 
 addCards();
-newPlace.addEventListener('submit', addCardToCardsArray); 
 
-modalWindows();
+const popupProfile = document.querySelector('.popup_type_edit');
+const popupAddNewCard = document.querySelector('.popup_type_new-card');
+const popupImage = document.querySelector('.popup_type_image');
 
+const editButton = document.querySelector('.profile__edit-button');
+const addButton = document.querySelector('.profile__add-button');
+const closeProfilePopupButton = popupProfile.querySelector('.popup__close');
+const closeAddPopupButton = popupAddNewCard.querySelector('.popup__close');
+const closeImageAsButton = popupImage.querySelector('.popup__close');
+
+const popupImageImage = popupImage.querySelector('.popup__image');
+const popupImageCaption = popupImage.querySelector('.popup__caption');
+const cardItems = document.querySelectorAll('.card__image');
+
+///Блок отвечающий за сохранение данных в popup 'редактирование профиля'
+const profileName = document.querySelector('.profile__title');
+const profileDescription = document.querySelector('.profile__description');
+const profileForm = document.forms.editProfile;
+const profileFormName = profileForm.querySelector('.popup__input_type_name');
+const profileFormDescription = profileForm.querySelector(
+  '.popup__input_type_description'
+);
+
+profileFormName.setAttribute('placeholder', profileName.textContent);
+profileFormDescription.setAttribute('placeholder',  profileDescription.textContent);
+
+function changeProfile(evt) {
+  evt.preventDefault();
+  profileName.textContent = profileFormName.value;
+  profileDescription.textContent = profileFormDescription.value;
+  closePopup(popupProfile);
+}
+
+//Слушатели на закрытие форм + слушатель постановки лайка
+profileForm.addEventListener('submit', changeProfile);
+newPlace.addEventListener('submit', addCardToCardsArray);
+cardsOnPage.addEventListener('click', function (evt) {
+  if (evt.target.classList.contains('card__like-button')) {
+    likeCard(evt);
+  }
+});
+
+//Вызовы функций открытия и закрытия модальных окон
+openPopupByButton(editButton, popupProfile);
+openPopupByButton(addButton, popupAddNewCard);
+closePopapByButton(closeProfilePopupButton, popupProfile);
+closePopapByButton(closeAddPopupButton, popupAddNewCard);
+closePopapByButton(closeImageAsButton, popupImage);
+
+//открытие попапа изображения
+export function openImagePopup(link, alt) {
+  popupImageImage.src = link;
+  popupImageImage.alt = alt;
+  popupImageCaption.textContent = alt;
+  openPopup(popupImage);
+}
+
+cardItems.forEach(function (cardItem) {
+  cardItem.addEventListener('click', function () {
+    openImagePopup(cardItem.src, cardItem.alt);
+  });
+});
