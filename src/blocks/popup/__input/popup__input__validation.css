@@ -1,0 +1,19 @@
+.form__input-error_active {
+    opacity: 1;
+  }
+  
+  .form__input-error {
+    font-size: 12px;
+    left: 0;
+    transition: 0.3s;
+    z-index: 1; 
+    color: #F00;
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  }
+  
+  .popup__input:invalid {
+    border-bottom: 1px solid #FF0000; 
+  } 

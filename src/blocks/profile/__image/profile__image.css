@@ -7,6 +7,7 @@
   background-size: cover;
   background-position: center;
   margin: 0 29px 0 0;
+  position: relative;
 }
 
 @media screen and (max-width: 740px) {
@@ -19,4 +20,29 @@
   .profile__image {
     margin-right: 0;
   }
+}
+
+.profile__image:hover {
+  cursor: pointer;
+}
+
+.profile__image:hover::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  z-index: 2;
+  opacity: 0.6;
+}
+
+.profile__image:hover::after {
+  content: url("/src/images/changingAvatar.svg");
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
 }
