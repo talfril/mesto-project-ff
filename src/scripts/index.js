@@ -6,6 +6,7 @@ import {
   uzerAuthorization,
   pushMyAuthorizationToServer,
   changeMyAvatar,
+  checkResponse,
 } from './api.js';
 
 addCards();
@@ -44,16 +45,29 @@ function openProfilePopupByButton() {
 
 editButton.addEventListener('click', openProfilePopupByButton);
 
+// Изменение профиля
 function changeProfile(evt) {
   evt.preventDefault();
+  const saveButton = evt.target.querySelector('.popup__button');
+  renderLoading(true, saveButton);
+
   profileName.textContent = profileFormName.value;
   profileDescription.textContent = profileFormDescription.value;
   pushMyAuthorizationToServer(
     profileFormName.value,
     profileFormDescription.value
-  );
-  closePopup(popupProfile);
-  profileForm.reset();
+  )
+    .then(checkResponse)
+    .then(() => {
+      closePopup(popupProfile);
+      profileForm.reset();
+    })
+    .catch((err) => {
+      console.log(`Ошибка: ${err}`);
+    })
+    .finally(() => {
+      renderLoading(false, saveButton);
+    });
 }
 
 setProfileFormValues();
@@ -73,13 +87,21 @@ changeAvatarButton.addEventListener('click', function () {
 
 function changeProfileAvatar(evt) {
   evt.preventDefault();
+  const saveButton = avatarForm.querySelector('.popup__button');
   const avatarUrl = changeAvatarForm.value;
   profileImage.style.backgroundImage = `url('${avatarUrl}')`;
-  renderLoading(true);
-  changeMyAvatar(avatarUrl).then(() => {
-    closePopup(popupChangeAvatar);
-    avatarForm.reset();
-  });
+  renderLoading(true, saveButton);
+  changeMyAvatar(avatarUrl)
+    .then(() => {
+      closePopup(popupChangeAvatar);
+      avatarForm.reset();
+    })
+    .catch((error) => {
+      console.error('Ошибка при сохранении аватара:', error);
+    })
+    .finally(() => {
+      renderLoading(false, saveButton);
+    });
 }
 
 //Слушатели на закрытие форм + слушатель постановки лайка
@@ -119,20 +141,9 @@ uzerAuthorization()
     console.error('Ошибка получения данных пользователя:', error);
   });
 
-export function renderLoading(isLoading) {
-  const activePopup = document.querySelector('.popup.popup_is-opened');
-  if (!activePopup) {
-    console.error('Ошибка: активный попап не найден.');
-    return;
-  }
-  const popupButton = activePopup.querySelector('.popup__button');
-  if (!popupButton) {
-    console.error('Ошибка: кнопка внутри активного попапа не найдена.');
-    return;
-  }
-  if (isLoading) {
-    popupButton.textContent = 'Сохранение...';
-  } else {
-    popupButton.textContent = 'Сохранить';
+export function renderLoading(isLoading, button) {
+  if (button && button.classList.contains('popup__button')) {
+    const buttonText = isLoading ? 'Сохранение...' : 'Сохранить';
+    button.textContent = buttonText;
   }
 }
