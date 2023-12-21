@@ -55,7 +55,10 @@
               data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
               required
             />
-            <span class="form__input-error name-input-error"></span>
+            <span
+              class="form__input-error name-input-error"
+              data-error-for="name-input"
+            ></span>
             <input
               type="text"
               pattern="[a-zA-Zа-яА-ЯёЁ\s\-\,]+"
@@ -68,7 +71,10 @@
               data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
               required
             />
-            <span class="form__input-error description-input-error"></span>
+            <span
+              class="form__input-error description-input-error"
+              data-error-for="description-input"
+            ></span>
             <button type="submit" class="button popup__button" disabled>
               Сохранить
             </button>
@@ -92,7 +98,10 @@
               data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
               required
             />
-            <span class="form__input-error image-name-input-error"></span>
+            <span
+              class="form__input-error image-name-input-error"
+              data-error-for="image-name-input"
+            ></span>
             <input
               type="url"
               id="url-input"
@@ -101,7 +110,10 @@
               placeholder="Ссылка на картинку"
               required
             />
-            <span class="form__input-error url-input-error"></span>
+            <span
+              class="form__input-error url-input-error"
+              data-error-for="url-input"
+            ></span>
             <button type="submit" class="button popup__button" disabled>
               Сохранить
             </button>
@@ -121,7 +133,10 @@
               placeholder="Ссылка на картинку"
               required
             />
-            <span class="form__input-error url-input-error"></span>
+            <span
+              class="form__input-error url-input-error"
+              data-error-for="url-input"
+            ></span>
             <button type="submit" class="button popup__button" disabled>
               Сохранить
             </button>

@@ -1,44 +1,50 @@
-export const currentUserId = '6e340979d9839190a86d236f';
+export let currentUserId;
+const baseUrl = 'https://nomoreparties.co/v1/wff-cohort-2';
+const authorizationToken = 'c1324e8c-3ffd-41bf-8d8d-d39bc9277f92';
+
 const config = {
-  baseUrl: 'https://nomoreparties.co/v1/wff-cohort-2',
   headers: {
-    authorization: 'c1324e8c-3ffd-41bf-8d8d-d39bc9277f92',
+    authorization: authorizationToken,
     'Content-Type': 'application/json',
   },
 };
 
-export function checkResponse(res) {
+function checkResponse(res) {
   if (!res.ok) {
     return Promise.reject(`Ошибка: ${res.status}`);
   }
   return res.json();
 }
 
-export function uzerAuthorization() {
-  return fetch(`${config.baseUrl}/users/me`, { headers: config.headers })
-    .then(checkResponse)
-    .then((result) => {
+function request(url, options) {
+  return fetch(url, options).then(checkResponse);
+}
+
+export function authorizeUser() {
+  return request(`${baseUrl}/users/me`, { headers: config.headers }).then(
+    (result) => {
+      currentUserId = result._id;
       return {
         name: result.name,
         about: result.about,
         avatar: `url('${result.avatar}')`,
+        _id: currentUserId,
       };
-    });
+    }
+  );
 }
 
 export function getCardsFromServer() {
-  return fetch(`${config.baseUrl}/cards`, {
-    headers: config.headers,
-  })
-    .then(checkResponse)
-    .then((result) => {
+  return request(`${baseUrl}/cards`, { headers: config.headers }).then(
+    (result) => {
       const initialCardsFromServer = Array.from(result);
       return initialCardsFromServer;
-    });
+    }
+  );
 }
 
 export function pushMyAuthorizationToServer(name, description) {
-  return fetch(`${config.baseUrl}/users/me`, {
+  return request(`${baseUrl}/users/me`, {
     method: 'PATCH',
     headers: config.headers,
     body: JSON.stringify({
@@ -49,45 +55,53 @@ export function pushMyAuthorizationToServer(name, description) {
 }
 
 export function pushMyCardToServer(cardName, cardLink) {
-  return fetch(`${config.baseUrl}/cards`, {
+  return request(`${baseUrl}/cards`, {
     method: 'POST',
     headers: config.headers,
     body: JSON.stringify({
       name: cardName,
       link: cardLink,
     }),
-  }).then(checkResponse);
+  });
 }
 
 export function deleteCardOnServer(cardId) {
-  return fetch(`${config.baseUrl}/cards/${cardId}`, {
+  return request(`${baseUrl}/cards/${cardId}`, {
     method: 'DELETE',
     headers: config.headers,
   });
 }
 
 export function likeCardOnServer(cardId) {
-  return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
+  return request(`${baseUrl}/cards/likes/${cardId}`, {
     method: 'PUT',
     headers: config.headers,
     body: JSON.stringify({}),
-  }).then(checkResponse);
+  });
 }
 
 export function disLikeCardOnServer(cardId) {
-  return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
+  return request(`${baseUrl}/cards/likes/${cardId}`, {
     method: 'DELETE',
     headers: config.headers,
     body: JSON.stringify({}),
-  }).then(checkResponse);
+  });
 }
 
-export function changeMyAvatar(avatarUrl) {
-  return fetch(`${config.baseUrl}/users/me/avatar`, {
+export function updateUserAvatar(avatarUrl) {
+  return request(`${baseUrl}/users/me/avatar`, {
     method: 'PATCH',
     headers: config.headers,
     body: JSON.stringify({
       avatar: avatarUrl,
     }),
-  }).then(checkResponse);
+  });
+}
+
+export function fetchUserDataAndCards() {
+  return Promise.all([authorizeUser(), getCardsFromServer()]).then(
+    ([userData, cardsData]) => {
+      return { userData, cardsData };
+    }
+  );
 }

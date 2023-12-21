@@ -1,16 +1,16 @@
-import { openImagePopup, popupAddNewCard, renderLoading } from './index.js';
-import { closePopup } from './modal.js';
+import { closePopup, openImagePopup } from './modal.js';
 import {
-  getCardsFromServer,
   pushMyCardToServer,
   currentUserId,
   deleteCardOnServer,
   likeCardOnServer,
   disLikeCardOnServer,
-  checkResponse,
 } from './api.js';
+import { renderLoading } from './utils.js';
 
 export const cardsOnPage = document.querySelector('.places__list');
+export const popupAddNewCard = document.querySelector('.popup_type_new-card');
+
 const cardTemplate = document.querySelector('#card-template').content;
 const newPlace = document.forms.newPlace;
 const placeName = newPlace.querySelector('.popup__input_type_card-name');
@@ -25,7 +25,7 @@ function createCard(place, deleteFunction, likeFunction, currentUserId) {
   const cardLikeButton = cardItem.querySelector('.card__like-button');
   const numberOfLikes = cardItem.querySelector('.likes-number');
 
-  const cardId = place._id || ''; 
+  const cardId = place._id || '';
   cardItem.dataset.cardId = cardId;
 
   if (place.owner && place.owner._id === currentUserId) {
@@ -42,7 +42,7 @@ function createCard(place, deleteFunction, likeFunction, currentUserId) {
   numberOfLikes.textContent = place.likes.length;
   deleteButton.addEventListener('click', deleteFunction);
   cardLikeButton.addEventListener('click', function () {
-    likeFunction(cardId); 
+    likeFunction(cardId);
   });
   cardImage.addEventListener('click', function () {
     openImagePopup(place.link, place.name);
@@ -51,17 +51,17 @@ function createCard(place, deleteFunction, likeFunction, currentUserId) {
   return cardItem;
 }
 
-//Функция удаления карточки
+// Функция удаления карточки
 function deleteCard(evt) {
   const cardToRemove = evt.target.closest('.card');
   const cardId = cardToRemove.dataset.cardId;
   deleteCardOnServer(cardId)
-    .then(checkResponse)
+    .then(() => {
+      cardToRemove.remove();
+    })
     .catch((err) => {
       console.log(`Ошибка: ${err}`);
-      throw err;
     });
-  cardToRemove.remove();
 }
 
 // Функция лайка/дизлайка карточки
@@ -83,27 +83,18 @@ export function likeCard(cardId) {
 }
 
 // Вывести карточки на страницу
-export function addCards() {
-  getCardsFromServer().then((initialCardsFromServer) => {
-    initialCardsFromServer.forEach(function (place) {
-      const card = createCard(place, deleteCard, likeCard, currentUserId);
-      cardsOnPage.appendChild(card);
-    });
+export function addCards(cardsData) {
+  cardsData.forEach(function (place) {
+    const card = createCard(place, deleteCard, likeCard, currentUserId);
+    cardsOnPage.appendChild(card);
   });
 }
 
 // Добавление новой карточки через попап
 export function addCardToCardsArray(evt) {
   evt.preventDefault();
-  const newCard = {
-    name: placeName.value,
-    link: placeLink.value,
-    likes: '',
-  };
-
-  const saveButton = evt.target.querySelector('.popup__button');
+  const saveButton = evt.submitter;
   renderLoading(true, saveButton);
-
   pushMyCardToServer(placeName.value, placeLink.value)
     .then((addedCard) => {
       const newPlaceCard = createCard(
@@ -113,8 +104,6 @@ export function addCardToCardsArray(evt) {
         currentUserId
       );
       cardsOnPage.insertBefore(newPlaceCard, cardsOnPage.firstChild);
-      const deleteButton = newPlaceCard.querySelector('.card__delete-button');
-      deleteButton.style.display = 'block';
       newPlace.reset();
       closePopup(popupAddNewCard);
     })

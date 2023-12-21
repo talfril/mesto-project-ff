@@ -1,25 +1,22 @@
 import '../pages/index.css';
-import { addCards, addCardToCardsArray } from './card.js';
-import { openPopup, closePopup, openPopupByButton } from './modal.js';
-import { enableValidation } from './validation.js';
+import { addCards, addCardToCardsArray, popupAddNewCard } from './card.js';
+import { openPopup, closePopup, openPopupByButton, popups } from './modal.js';
 import {
-  uzerAuthorization,
+  enableValidation,
+  validationConfig,
+  setEventListeners,
+  clearValidation,
+} from './validation.js';
+import {
   pushMyAuthorizationToServer,
-  changeMyAvatar,
-  checkResponse,
+  updateUserAvatar,
+  fetchUserDataAndCards,
 } from './api.js';
-
-addCards();
+import { renderLoading } from './utils.js';
 
 const popupProfile = document.querySelector('.popup_type_edit');
-export const popupAddNewCard = document.querySelector('.popup_type_new-card');
-export const popupImage = document.querySelector('.popup_type_image');
-
 const editButton = document.querySelector('.profile__edit-button');
 const addButton = document.querySelector('.profile__add-button');
-
-const popupImageImage = popupImage.querySelector('.popup__image');
-const popupImageCaption = popupImage.querySelector('.popup__caption');
 
 // Блок отвечающий за сохранение данных в popup 'редактирование профиля'
 const profileName = document.querySelector('.profile__title');
@@ -51,14 +48,13 @@ function changeProfile(evt) {
   const saveButton = evt.target.querySelector('.popup__button');
   renderLoading(true, saveButton);
 
-  profileName.textContent = profileFormName.value;
-  profileDescription.textContent = profileFormDescription.value;
   pushMyAuthorizationToServer(
     profileFormName.value,
     profileFormDescription.value
   )
-    .then(checkResponse)
     .then(() => {
+      profileName.textContent = profileFormName.value;
+      profileDescription.textContent = profileFormDescription.value;
       closePopup(popupProfile);
       profileForm.reset();
     })
@@ -89,12 +85,15 @@ function changeProfileAvatar(evt) {
   evt.preventDefault();
   const saveButton = avatarForm.querySelector('.popup__button');
   const avatarUrl = changeAvatarForm.value;
-  profileImage.style.backgroundImage = `url('${avatarUrl}')`;
   renderLoading(true, saveButton);
-  changeMyAvatar(avatarUrl)
+
+  updateUserAvatar(avatarUrl)
     .then(() => {
+      profileImage.style.backgroundImage = `url('${avatarUrl}')`;
       closePopup(popupChangeAvatar);
       avatarForm.reset();
+      clearValidation(avatarForm, validationConfig);
+      setEventListeners(avatarForm, validationConfig); 
     })
     .catch((error) => {
       console.error('Ошибка при сохранении аватара:', error);
@@ -109,41 +108,30 @@ profileForm.addEventListener('submit', changeProfile);
 newPlace.addEventListener('submit', addCardToCardsArray);
 avatarForm.addEventListener('submit', changeProfileAvatar);
 
+popups.forEach(function (popup) {
+  popup.addEventListener('click', function (evt) {
+    if (
+      evt.target === evt.currentTarget ||
+      evt.target.classList.contains('popup__close')
+    ) {
+      closePopup(popup);
+    }
+  });
+});
+
 //Вызовы функций открытия и закрытия модальных окон
 openPopupByButton(addButton, popupAddNewCard);
 
-//открытие попапа изображения
-export function openImagePopup(link, alt) {
-  popupImageImage.src = link;
-  popupImageImage.alt = alt;
-  popupImageCaption.textContent = alt;
-  openPopup(popupImage);
-}
+enableValidation(validationConfig);
 
-//вызов валидации
-enableValidation({
-  formSelector: '.popup__form',
-  inputSelector: '.popup__input',
-  submitButtonSelector: '.popup__button',
-  inactiveButtonClass: 'popup__button_disabled',
-  inputErrorClass: 'popup__input_type_error',
-  errorClass: 'popup__error_visible',
-});
-
-//работа с сервером
-uzerAuthorization()
-  .then((userData) => {
+fetchUserDataAndCards()
+  .then(({ userData, cardsData }) => {
     profileName.textContent = userData.name;
     profileDescription.textContent = userData.about;
     profileImage.style.backgroundImage = userData.avatar;
+
+    addCards(cardsData);
   })
   .catch((error) => {
-    console.error('Ошибка получения данных пользователя:', error);
+    console.error('Ошибка при получении данных пользователя:', error);
   });
-
-export function renderLoading(isLoading, button) {
-  if (button && button.classList.contains('popup__button')) {
-    const buttonText = isLoading ? 'Сохранение...' : 'Сохранить';
-    button.textContent = buttonText;
-  }
-}
