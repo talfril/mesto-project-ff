@@ -111,8 +111,7 @@ export function addCardToCardsArray(evt) {
       cardsOnPage.insertBefore(newPlaceCard, cardsOnPage.firstChild);
       newPlace.reset();
       clearValidation(newPlace, validationConfig);
-      setEventListeners(newPlace, validationConfig);
-      closePopup(popupAddNewCard);
+       closePopup(popupAddNewCard);
     })
     .catch((error) => {
       console.error('Ошибка при добавлении карточки:', error);

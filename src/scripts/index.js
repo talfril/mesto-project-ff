@@ -45,7 +45,7 @@ editButton.addEventListener('click', openProfilePopupByButton);
 // Изменение профиля
 function changeProfile(evt) {
   evt.preventDefault();
-  const saveButton = evt.target.querySelector('.popup__button');
+  const saveButton = evt.submitter;
   renderLoading(true, saveButton);
 
   pushMyAuthorizationToServer(
@@ -83,7 +83,7 @@ changeAvatarButton.addEventListener('click', function () {
 
 function changeProfileAvatar(evt) {
   evt.preventDefault();
-  const saveButton = avatarForm.querySelector('.popup__button');
+  const saveButton = evt.submitter;
   const avatarUrl = changeAvatarForm.value;
   renderLoading(true, saveButton);
 
@@ -93,7 +93,6 @@ function changeProfileAvatar(evt) {
       closePopup(popupChangeAvatar);
       avatarForm.reset();
       clearValidation(avatarForm, validationConfig);
-      setEventListeners(avatarForm, validationConfig); 
     })
     .catch((error) => {
       console.error('Ошибка при сохранении аватара:', error);
