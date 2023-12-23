@@ -18,7 +18,7 @@
   border: none;
 }
 
-.button_inactive {
+.popup__button:disabled {
   background-color: white;
   color: #00000026;
   border: 1px solid #00000026;

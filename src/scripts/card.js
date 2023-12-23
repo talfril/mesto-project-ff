@@ -7,6 +7,11 @@ import {
   disLikeCardOnServer,
 } from './api.js';
 import { renderLoading } from './utils.js';
+import {
+  validationConfig,
+  setEventListeners,
+  clearValidation,
+} from './validation.js';
 
 export const cardsOnPage = document.querySelector('.places__list');
 export const popupAddNewCard = document.querySelector('.popup_type_new-card');
@@ -105,6 +110,8 @@ export function addCardToCardsArray(evt) {
       );
       cardsOnPage.insertBefore(newPlaceCard, cardsOnPage.firstChild);
       newPlace.reset();
+      clearValidation(newPlace, validationConfig);
+      setEventListeners(newPlace, validationConfig);
       closePopup(popupAddNewCard);
     })
     .catch((error) => {
